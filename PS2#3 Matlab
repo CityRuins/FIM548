@@ -1,0 +1,46 @@
+N=1000000;
+S1=50;
+K1=51;
+sigma1=0.28;
+T1=0.75;
+
+S2=20;
+K2=19;
+sigma2=0.25;
+T2=1;
+r=0.06;
+rho=0.4;
+
+Z1=normrnd(0,1,1,N);
+Z2=rho*Z1+sqrt(1-rho^2)*normrnd(0,1,1,N);
+mu=0;
+sigma=1;
+h = 1/252;
+S1_1=S1*exp((r-sigma1^2/2)*h+sigma1*sqrt(h)*Z1);
+S2_1=S2*exp((r-sigma2^2/2)*h+sigma2*sqrt(h)*Z2);
+
+%%t=0 portfolio value
+p0=C(S1,T1)+P(S2,T2);
+%%t=1 portfolio value **remind: maturity date would minus 1.
+p1=C(S1_1,T1-h)+P(S2_1,T2-h);
+dV=p0-p1;
+VaR=-prctile(dV,1)*(sqrt(10));
+display(VaR);
+
+function CC = C(S,T)
+K1=51;
+sigma1=0.28;
+r=0.06;
+mu=0;
+sigma=1;
+CC = S.*cdf("Normal",(log(S./K1)+(r+sigma1^2/2)*T)./(sigma1*sqrt(T)),mu,sigma)-K1*exp(-r*T)*cdf("Normal",(log(S./K1)+(r-sigma1^2/2)*T)./(sigma1*sqrt(T)),mu,sigma);
+end
+
+function PP = P(S,T)
+mu=0;
+sigma=1;
+K2=19;
+sigma2=0.25;
+r=0.06;
+PP = -S.*cdf("Normal",(log(K2./S)-(r+sigma2^2/2)*T)./(sigma2*sqrt(T)),mu,sigma)+K2*exp(-r*T)*cdf("Normal",(log(K2./S)-(r-sigma2^2/2)*T)./(sigma2*sqrt(T)),mu,sigma);
+end
