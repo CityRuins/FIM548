@@ -1,0 +1,36 @@
+S1=50;
+K1=51;
+sigma1=0.28;
+T1=0.75;
+
+S2=20;
+K2=19;
+sigma2=0.25;
+T2=1;
+r=0.06;
+rho=0.4;
+N=1000000;
+
+mu = 0;
+sigma = 1;
+
+delta_c=cdf("Normal",(log(S1/K1)+(r+sigma1^2/2)*T1)/(sigma1*sqrt(T1)),mu,sigma);
+delta_p=cdf("Normal",(log(S2/K2)+(r+sigma2^2/2)*T2)/(sigma2*sqrt(T2)),mu,sigma)-1;
+
+Z1=normrnd(0,1,1,N);
+Z2=rho*Z1+sqrt(1-rho^2)*normrnd(0,1,1,N);
+dx1=Z1*sigma1/sqrt(252);
+dx2=Z2*sigma2/sqrt(252);
+
+%%second order of C/S **remind chain rule
+x1 = pdf("Normal",(log(S1/K1)+(r+sigma1^2/2)*T1)/(sigma1*sqrt(T1)),mu,sigma);
+x2 = pdf("Normal",(log(S2/K2)+(r+sigma2^2/2)*T2)/(sigma2*sqrt(T2)),mu,sigma);
+gamma1=x1/(S1*sigma1*sqrt(T1));
+gamma2=x2/(S2*sigma2*sqrt(T2));
+
+dV1=delta_c*S1*dx1+0.5*gamma1*(S1^2)*(dx1.^2);
+dV2=delta_p*S2*dx2+0.5*gamma2*(S2^2)*(dx2.^2);
+dV=dV1+dV2;
+
+VaR=-prctile(dV,1)*sqrt(10);
+display(VaR);
